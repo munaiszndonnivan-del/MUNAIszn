@@ -9,7 +9,6 @@ import {
   ShieldCheck, 
   CheckCircle, 
   XCircle, 
-  AlertCircle, 
   Loader2, 
   Copy, 
   Printer, 
@@ -21,33 +20,18 @@ import {
   X
 } from 'lucide-react';
 
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  selling_price: number;
-  current_stock: number;
-  is_service: boolean;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
 export default function MunaisznApp() {
-  const [activeTab, setActiveTab] = useState<'pos' | 'hub' | 'subscriptions' | 'dashboard'>('pos');
+  const [activeTab, setActiveTab] = useState('pos');
   const [search, setSearch] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<any[]>([]);
   const [customerPhone, setCustomerPhone] = useState('');
 
-  // STK State Machine: IDLE | WAITING_FOR_PAYMENT | APPROVED | DENIED | FAILED
-  const [stkState, setStkState] = useState<string>('IDLE');
-  const [stkReceiptNumber, setStkReceiptNumber] = useState<string>('');
-  const [stkError, setStkError] = useState<string>('');
-  const [receiptData, setReceiptData] = useState<any | null>(null);
+  // STK State Machine
+  const [stkState, setStkState] = useState('IDLE');
+  const [stkReceiptNumber, setStkReceiptNumber] = useState('');
+  const [receiptData, setReceiptData] = useState<any>(null);
 
-  // M-Pesa Hub Configuration State
+  // M-Pesa Hub Configuration
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [methods, setMethods] = useState({
     personal: '0712 345 678',
@@ -58,12 +42,12 @@ export default function MunaisznApp() {
   });
 
   // Subscription State
-  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'business'>('pro');
+  const [selectedPlan, setSelectedPlan] = useState('pro');
   const [subRef, setSubRef] = useState('');
   const [subSubmitted, setSubSubmitted] = useState(false);
 
-  // Product Catalog
-  const [products] = useState<Product[]>([
+  // Products Catalog
+  const [products] = useState([
     { id: '1', name: 'Kitui Pure Raw Honey 1kg', sku: 'HNY-01', selling_price: 1200, current_stock: 5, is_service: false },
     { id: '2', name: 'Nairobi Amber Honey 500g', sku: 'HNY-02', selling_price: 650, current_stock: 2, is_service: false },
     { id: '3', name: 'Beard Grooming Elixir 50ml', sku: 'BRD-09', selling_price: 1500, current_stock: 10, is_service: false },
@@ -77,10 +61,10 @@ export default function MunaisznApp() {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: any) => {
     const existing = cart.find(i => i.product.id === product.id);
     if (!product.is_service && existing && existing.quantity >= product.current_stock) {
-      alert(`Safety rule: Cannot exceed available stock of ${product.current_stock}.`);
+      alert(`Safety rule: Cannot exceed stock of ${product.current_stock}.`);
       return;
     }
     if (!product.is_service && product.current_stock <= 0) {
@@ -123,7 +107,6 @@ export default function MunaisznApp() {
     }
     setStkState('WAITING_FOR_PAYMENT');
 
-    // Simulate Daraja STK confirmation
     setTimeout(() => {
       setStkState('APPROVED');
       setStkReceiptNumber(`QGD${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
@@ -133,7 +116,7 @@ export default function MunaisznApp() {
   const handleSubSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subRef || subRef.length !== 10) {
-      alert('Please enter a valid 10-character M-Pesa transaction reference (e.g., QGD82XXXXX)');
+      alert('Please enter a valid 10-character M-Pesa transaction reference (e.g. QGD82XXXXX)');
       return;
     }
     setSubSubmitted(true);
@@ -141,10 +124,8 @@ export default function MunaisznApp() {
 
   return (
     <div className="min-h-screen bg-[#060908] text-[#F3F7F4] flex flex-col md:flex-row antialiased font-sans">
-      {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#0B1210] border-r border-[#16E6A5]/10 flex flex-col justify-between p-4 shrink-0">
         <div>
-          {/* Brand Logo & Wordmark */}
           <div className="flex items-center space-x-3 px-2 py-4 border-b border-[#16E6A5]/10">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#16E6A5] via-[#35D9EA] to-[#D4B16A] p-[1.5px]">
               <div className="w-full h-full bg-[#060908] rounded-xl flex items-center justify-center">
@@ -157,7 +138,6 @@ export default function MunaisznApp() {
             </div>
           </div>
 
-          {/* Active Store Workspace */}
           <div className="mt-4 px-3 py-2 bg-[#101A16] border border-[#16E6A5]/20 rounded-xl flex items-center justify-between">
             <div className="truncate">
               <p className="text-xs font-semibold text-[#F3F7F4] truncate">Savannah Tech & Retail</p>
@@ -168,7 +148,6 @@ export default function MunaisznApp() {
             </span>
           </div>
 
-          {/* Nav Items */}
           <nav className="mt-6 space-y-1">
             <button
               onClick={() => setActiveTab('pos')}
@@ -220,7 +199,6 @@ export default function MunaisznApp() {
           </nav>
         </div>
 
-        {/* Diagnostic Card */}
         <div className="bg-[#101A16] p-3 rounded-xl border border-[#16E6A5]/10 text-[11px] space-y-1.5 mt-6">
           <div className="flex items-center justify-between text-[#A2B2AA]">
             <span>Platform Paybill</span>
@@ -237,7 +215,6 @@ export default function MunaisznApp() {
         </div>
       </aside>
 
-      {/* Main Operations Area */}
       <main className="flex-1 flex flex-col min-w-0 min-h-screen">
         <header className="h-16 border-b border-[#16E6A5]/10 px-6 flex items-center justify-between bg-[#060908]/80 backdrop-blur sticky top-0 z-30">
           <h2 className="text-sm font-semibold tracking-wide text-[#F3F7F4]">
@@ -250,10 +227,8 @@ export default function MunaisznApp() {
         </header>
 
         <div className="p-4 md:p-6 flex-1">
-          {/* TAB 1: POS TERMINAL */}
           {activeTab === 'pos' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Product Catalog */}
               <div className="lg:col-span-7 space-y-4">
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3.5 top-3 text-[#A2B2AA]" />
@@ -312,7 +287,6 @@ export default function MunaisznApp() {
                 </div>
               </div>
 
-              {/* Cart Register */}
               <div className="lg:col-span-5 bg-[#101A16] border border-[#16E6A5]/20 rounded-2xl p-5 flex flex-col justify-between shadow-2xl">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-[#16E6A5]/10">
@@ -391,7 +365,6 @@ export default function MunaisznApp() {
             </div>
           )}
 
-          {/* TAB 2: M-PESA PAYMENT HUB */}
           {activeTab === 'hub' && (
             <div className="max-w-3xl space-y-6">
               <div className="bg-[#101A16] border border-[#16E6A5]/20 p-6 rounded-2xl">
@@ -402,7 +375,6 @@ export default function MunaisznApp() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Till */}
                 <div className="bg-[#101A16] border border-[#16E6A5]/10 p-5 rounded-2xl space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-mono uppercase bg-[#15231D] text-[#16E6A5] px-2 py-0.5 rounded">
@@ -424,7 +396,346 @@ export default function MunaisznApp() {
                   </div>
                 </div>
 
-                {/* Pochi */}
                 <div className="bg-[#101A16] border border-[#16E6A5]/10 p-5 rounded-2xl space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-mono uppercase bg-[#15231D] text-[#35D9EA] px-2 py-0.5 rounded"
+                    <span className="text-[10px] font-mono uppercase bg-[#15231D] text-[#35D9EA] px-2 py-0.5 rounded">
+                      Pochi la Biashara
+                    </span>
+                    <button onClick={() => copyToClipboard(methods.pochi, 'pochi')} className="text-xs text-[#35D9EA] hover:underline flex items-center space-x-1">
+                      {copiedKey === 'pochi' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedKey === 'pochi' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#A2B2AA] block mb-1">Pochi Mobile Number</label>
+                    <input
+                      type="text"
+                      value={methods.pochi}
+                      onChange={e => setMethods({ ...methods, pochi: e.target.value })}
+                      className="w-full bg-[#15231D] border border-[#16E6A5]/20 rounded-xl px-3 py-2 text-xs font-mono text-[#F3F7F4]"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-[#101A16] border border-[#16E6A5]/10 p-5 rounded-2xl space-y-3 md:col-span-2">
+                  <span className="text-[10px] font-mono uppercase bg-[#15231D] text-[#D4B16A] px-2 py-0.5 rounded">
+                    Customer Paybill
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                    <div>
+                      <label className="text-[10px] text-[#A2B2AA] block mb-1">Paybill Number</label>
+                      <input
+                        type="text"
+                        value={methods.paybill}
+                        onChange={e => setMethods({ ...methods, paybill: e.target.value })}
+                        className="w-full bg-[#15231D] border border-[#16E6A5]/20 rounded-xl px-3 py-2 text-xs font-mono text-[#F3F7F4]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#A2B2AA] block mb-1">Account Reference Instructions</label>
+                      <input
+                        type="text"
+                        value={methods.accountRef}
+                        onChange={e => setMethods({ ...methods, accountRef: e.target.value })}
+                        className="w-full bg-[#15231D] border border-[#16E6A5]/20 rounded-xl px-3 py-2 text-xs font-mono text-[#F3F7F4]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => alert('Payment hub configurations saved successfully.')}
+                  className="px-6 py-2.5 bg-[#16E6A5] text-black font-bold text-xs rounded-xl flex items-center space-x-2 hover:bg-[#16E6A5]/90 transition"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Payment Hub Settings</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'subscriptions' && (
+            <div className="max-w-3xl space-y-6">
+              <div className="bg-[#101A16] border border-[#16E6A5]/20 p-6 rounded-2xl">
+                <h3 className="text-sm font-bold text-[#F3F7F4] flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-[#D4B16A]" />
+                  <span>Platform Subscriptions & Billing</span>
+                </h3>
+                <p className="text-xs text-[#A2B2AA] mt-1">
+                  Pay your monthly SaaS subscription to unlock unlimited sales, multi-user accounts, and customer M-Pesa hub integration.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  onClick={() => setSelectedPlan('pro')}
+                  className={`p-5 rounded-2xl border cursor-pointer transition ${
+                    selectedPlan === 'pro' ? 'bg-[#15231D] border-[#16E6A5]' : 'bg-[#101A16] border-[#16E6A5]/10'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="text-sm font-bold text-[#F3F7F4]">Pro Merchant</h4>
+                      <p className="text-xs text-[#A2B2AA]">Single-shop professional</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#16E6A5]">KSh 499/mo</span>
+                  </div>
+                  <ul className="mt-4 space-y-1.5 text-xs text-[#A2B2AA]">
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>Unlimited monthly sales</span></li>
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>M-Pesa Payment Hub</span></li>
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>Thermal receipts & exports</span></li>
+                  </ul>
+                </div>
+
+                <div
+                  onClick={() => setSelectedPlan('business')}
+                  className={`p-5 rounded-2xl border cursor-pointer transition ${
+                    selectedPlan === 'business' ? 'bg-[#15231D] border-[#16E6A5]' : 'bg-[#101A16] border-[#16E6A5]/10'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="text-sm font-bold text-[#F3F7F4]">Enterprise Scale</h4>
+                      <p className="text-xs text-[#A2B2AA]">Multi-staff operations</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#D4B16A]">KSh 999/mo</span>
+                  </div>
+                  <ul className="mt-4 space-y-1.5 text-xs text-[#A2B2AA]">
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>Up to 10 staff cashiers</span></li>
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>All Pro Merchant perks</span></li>
+                    <li className="flex items-center space-x-2"><Check className="w-3.5 h-3.5 text-[#16E6A5]" /> <span>Priority Safaricom support</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-[#101A16] border border-[#16E6A5]/20 p-6 rounded-2xl space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#D4B16A]">Payment Instructions (Paybill 174379)</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                  <div className="bg-[#15231D] p-3 rounded-xl">
+                    <p className="text-[10px] text-[#A2B2AA]">Platform Paybill</p>
+                    <p className="text-sm font-bold text-[#F3F7F4] mt-1">174379</p>
+                  </div>
+                  <div className="bg-[#15231D] p-3 rounded-xl">
+                    <p className="text-[10px] text-[#A2B2AA]">Account Number</p>
+                    <p className="text-sm font-bold text-[#16E6A5] mt-1">MUNAISZN-BIZ1</p>
+                  </div>
+                  <div className="bg-[#15231D] p-3 rounded-xl">
+                    <p className="text-[10px] text-[#A2B2AA]">Amount</p>
+                    <p className="text-sm font-bold text-[#D4B16A] mt-1">
+                      KES {selectedPlan === 'pro' ? '499.00' : '999.00'}
+                    </p>
+                  </div>
+                </div>
+
+                {subSubmitted ? (
+                  <div className="p-4 bg-[#15231D] border border-[#16E6A5]/30 rounded-xl text-xs space-y-2">
+                    <p className="font-bold text-[#16E6A5]">Payment Verification in Progress</p>
+                    <p className="text-[#A2B2AA]">
+                      Reference <span className="font-mono text-[#F3F7F4]">{subRef}</span> has been logged. An administrator will verify it against the Paybill 174379 statement within 30 minutes. Your store remains fully active.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubSubmit} className="space-y-3 pt-2">
+                    <div>
+                      <label className="text-[10px] text-[#A2B2AA] block mb-1">M-Pesa Transaction Reference Code</label>
+                      <input
+                        type="text"
+                        maxLength={10}
+                        placeholder="e.g. QGD82XXXXX"
+                        value={subRef}
+                        onChange={e => setSubRef(e.target.value.toUpperCase())}
+                        className="w-full bg-[#15231D] border border-[#16E6A5]/20 rounded-xl px-4 py-2.5 text-xs text-[#F3F7F4] font-mono tracking-widest focus:outline-none focus:border-[#16E6A5]"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-[#16E6A5] text-black font-bold text-xs rounded-xl hover:bg-[#16E6A5]/90 transition"
+                    >
+                      Submit M-Pesa Proof for Verification
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#101A16] border border-[#16E6A5]/10 p-4 rounded-xl">
+                  <p className="text-xs text-[#A2B2AA]">Today's Reconciled Sales</p>
+                  <p className="text-lg font-bold text-[#16E6A5] mt-1">KES 24,850.00</p>
+                  <span className="text-[10px] text-[#A2B2AA]">12 recorded orders</span>
+                </div>
+                <div className="bg-[#101A16] border border-[#16E6A5]/10 p-4 rounded-xl">
+                  <p className="text-xs text-[#A2B2AA]">Operating Expenses</p>
+                  <p className="text-lg font-bold text-amber-400 mt-1">KES 4,200.00</p>
+                  <span className="text-[10px] text-[#A2B2AA]">Packaging & Delivery</span>
+                </div>
+                <div className="bg-[#101A16] border border-[#16E6A5]/10 p-4 rounded-xl">
+                  <p className="text-xs text-[#A2B2AA]">Estimated Net Margin</p>
+                  <p className="text-lg font-bold text-[#35D9EA] mt-1">KES 13,650.00</p>
+                  <span className="text-[10px] text-[#A2B2AA]">Cost of goods accounted</span>
+                </div>
+                <div className="bg-[#101A16] border border-[#16E6A5]/10 p-4 rounded-xl">
+                  <p className="text-xs text-[#A2B2AA]">Customer Balances Due</p>
+                  <p className="text-lg font-bold text-rose-400 mt-1">KES 1,500.00</p>
+                  <span className="text-[10px] text-[#A2B2AA]">1 active credit account</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {stkState !== 'IDLE' && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101A16] border border-[#16E6A5]/30 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl space-y-4">
+            {stkState === 'WAITING_FOR_PAYMENT' && (
+              <>
+                <Loader2 className="w-12 h-12 text-[#16E6A5] animate-spin mx-auto" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#F3F7F4]">Enter M-Pesa PIN</h3>
+                <p className="text-xs text-[#A2B2AA]">
+                  STK prompt sent to <span className="text-[#16E6A5] font-mono font-semibold">{customerPhone}</span>. Awaiting buyer handset confirmation...
+                </p>
+                <div className="p-3 bg-[#15231D] rounded-xl text-xs font-mono text-[#16E6A5]">
+                  Amount: KES {cartTotal.toLocaleString()}
+                </div>
+              </>
+            )}
+
+            {stkState === 'APPROVED' && (
+              <>
+                <CheckCircle className="w-12 h-12 text-[#16E6A5] mx-auto animate-bounce" />
+                <h3 className="text-base font-bold text-[#16E6A5]">PAYMENT APPROVED</h3>
+                <div className="bg-[#15231D] p-3 rounded-xl text-left text-xs font-mono space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-[#A2B2AA]">M-Pesa Ref:</span>
+                    <span className="text-[#F3F7F4] font-bold">{stkReceiptNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#A2B2AA]">Amount:</span>
+                    <span className="text-[#16E6A5]">KES {cartTotal.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setReceiptData({
+                        receiptNumber: `RCP-${Date.now().toString().slice(-6)}`,
+                        businessName: 'Savannah Tech & Retail',
+                        date: new Date().toISOString(),
+                        items: cart.map(i => ({ name: i.product.name, qty: i.quantity, total: i.product.selling_price * i.quantity })),
+                        total: cartTotal,
+                        paymentMethod: 'MPESA_STK',
+                        ref: stkReceiptNumber
+                      });
+                      setStkState('IDLE');
+                      setCart([]);
+                    }}
+                    className="flex-1 py-2 bg-[#15231D] hover:bg-[#15231D]/80 border border-[#16E6A5]/20 text-xs font-semibold rounded-lg flex items-center justify-center space-x-1"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>View Receipt</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStkState('IDLE');
+                      setCart([]);
+                    }}
+                    className="flex-1 py-2 bg-[#16E6A5] hover:bg-[#16E6A5]/90 text-black text-xs font-bold rounded-lg"
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            )}
+
+            {stkState === 'DENIED' && (
+              <>
+                <XCircle className="w-12 h-12 text-rose-500 mx-auto" />
+                <h3 className="text-base font-bold text-rose-500">PAYMENT DENIED</h3>
+                <p className="text-xs text-[#A2B2AA]">The customer cancelled the prompt on their phone.</p>
+                <button
+                  onClick={() => setStkState('IDLE')}
+                  className="w-full py-2 bg-[#15231D] text-[#F3F7F4] text-xs font-semibold rounded-lg border border-[#16E6A5]/20"
+                >
+                  Dismiss
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {receiptData && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#101A16] border border-[#16E6A5]/20 rounded-2xl max-w-sm w-full p-6 text-xs text-[#F3F7F4] shadow-2xl">
+            <div className="flex justify-between items-center pb-3 border-b border-[#16E6A5]/10 no-print">
+              <span className="font-bold text-[#16E6A5]">Official Receipt</span>
+              <button onClick={() => setReceiptData(null)} className="text-[#A2B2AA] hover:text-[#F3F7F4]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div id="receipt-print-area" className="my-4 font-mono space-y-3 bg-[#060908] p-4 rounded-xl border border-[#16E6A5]/10">
+              <div className="text-center space-y-1">
+                <h3 className="font-bold text-sm text-[#F3F7F4] uppercase">{receiptData.businessName}</h3>
+                <p className="text-[10px] text-[#A2B2AA]">Ref: {receiptData.receiptNumber}</p>
+                <p className="text-[10px] text-[#A2B2AA]">{new Date(receiptData.date).toLocaleString('en-KE')}</p>
+              </div>
+
+              <div className="border-t border-dashed border-[#16E6A5]/20 pt-2 space-y-1">
+                {receiptData.items?.map((item: any, idx: number) => (
+                  <div key={idx} className="flex justify-between text-[11px]">
+                    <span className="truncate pr-2">{item.qty}x {item.name}</span>
+                    <span>KES {item.total?.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-dashed border-[#16E6A5]/20 pt-2 space-y-1 text-[11px]">
+                <div className="flex justify-between font-bold text-[#16E6A5]">
+                  <span>TOTAL PAID</span>
+                  <span>KES {receiptData.total?.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-[10px] text-[#A2B2AA]">
+                  <span>Method</span>
+                  <span>{receiptData.paymentMethod}</span>
+                </div>
+                {receiptData.ref && (
+                  <div className="flex justify-between text-[10px] text-[#A2B2AA]">
+                    <span>Reference</span>
+                    <span className="text-[#D4B16A]">{receiptData.ref}</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-center text-[9px] text-[#A2B2AA] pt-2 border-t border-dashed border-[#16E6A5]/20">
+                Thank you for your business! Asante sana.
+              </p>
+            </div>
+
+            <div className="flex space-x-2 no-print">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 bg-[#15231D] hover:bg-[#15231D]/80 border border-[#16E6A5]/20 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print</span>
+              </button>
+              <button
+                onClick={() => setReceiptData(null)}
+                className="flex-1 py-2.5 bg-[#16E6A5] text-black rounded-xl text-xs font-bold hover:bg-[#16E6A5]/90"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
